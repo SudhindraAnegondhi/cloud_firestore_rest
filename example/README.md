@@ -2,16 +2,19 @@
 
 A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/docs/firestore/) by cross platform Flutter Apps.
 
+This package will work on  Android, IOS, Linux, macOs apps. The package has not been tested on Windows platform but there 
+are no technical reasons for it not to function correctly in Windows environment.
+
 ## Setup
 
 To use this package:
 
 1. Using the [Firebase Console](http://console.firebase.google.com/), add a _web_ app to your project.
-2. Go to **Project Settings** , copy down
+2. Go to **Project Settings** , copy
    1. Project ID
    2. Web API Key
 3. Add `cloud_firestore_rest` and `global_configuration` as a [dependency](https://flutter.dev/docs/development/packages-and-plugins/using-packages) in your `pubspec.yaml` file.
-4. Edit `lib/main.dart` and edit code
+4. Edit your app's `lib/main.dart` 
 
    ```dart
    +import 'package:global_configuration/global_configuration.dart';
@@ -28,7 +31,7 @@ To use this package:
 
    ```
 
-Of course you may use any of the `GlobalConfiguration` load methods of your choice to configure your app. The package expects `projectId` and `webKey` to be available as part of global configuration.
+Of course, you may use any of the `GlobalConfiguration` load methods of your choice to configure your app. The package expects `projectId` and `webKey` to be available as part of global configuration.
 
 ## Usage
 
@@ -59,6 +62,7 @@ List<Item> items = await getItems(query: [
 ]);
 } catch(error) {
   //handle error
+}
 
 ```
 
@@ -70,7 +74,10 @@ Call `Firestore.get(collection: 'collectionId')` without supplying a `query` arg
 
 ```dart
 ...
-Map<String, dynamic> document = await Firestore.getDocument(collection: 'items', id: searchId); // returns null if not found
+Map<String, dynamic> document = await Firestore.getDocument(
+  collection: 'items',
+  id: searchId,
+); // returns null if not found
 Item item = Item.fromJson(document);
 ...
 

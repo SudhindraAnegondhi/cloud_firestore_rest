@@ -1,6 +1,5 @@
 library cloud_firestore_rest;
 
-/// A Calculator.
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -27,10 +26,10 @@ class Query {
 
 ///
 ///  A Flutter Package to use the **Cloud Firestore REST API**
-/// 
+///
 /// To use the package:
 /// * Using the Firebase Console, add a Web App to your project. Note down the project id and web key of your project settings.
-/// 
+///
 
 class Firestore {
   ///
@@ -166,9 +165,9 @@ class Firestore {
   /// **body** contains a map with records contents
   ///
   /// *adds* a new document to the collection if there is no document corresponding to the **id**
-  /// 
+  ///
   /// **collection** must exist
-  /// 
+  ///
   /// throws exception on error
   ///
 
@@ -214,14 +213,14 @@ class Firestore {
     }
   }
 
-///
-/// Adds a record to the specified document/id. 
-/// 
-/// Creates a new collection if collection does not exist.
-/// 
-/// Throws exception if record exists 
-/// Throws exception on IO error
-/// 
+  ///
+  /// Adds a record to the specified document/id.
+  ///
+  /// Creates a new collection if collection does not exist.
+  ///
+  /// Throws exception if record exists
+  /// Throws exception on IO error
+  ///
   static Future<void> add({String collection, dynamic id, dynamic body}) async {
     try {
       final response = await http.post(
@@ -229,7 +228,8 @@ class Firestore {
         body: json.encode(serialize(body)),
       );
       if (response.statusCode >= 400) {
-        throw HttpException('Error adding $collection. ${response.reasonPhrase}');
+        throw HttpException(
+            'Error adding $collection. ${response.reasonPhrase}');
       }
     } catch (error) {
       throw HttpException('Error adding $collection. ${error.toString()}');
@@ -238,7 +238,7 @@ class Firestore {
 
   ///
   /// Deletes a document identified by collection and id
-  /// 
+  ///
   /// Throws exception if document does not exist
   /// Throws exception on I/O error
 
@@ -277,7 +277,7 @@ class Firestore {
 
 ///
 /// Specifes action to be taken with the passed email, password
-/// 
+///
 enum AuthAction {
   signUp,
   signInWithPassword,
@@ -293,7 +293,7 @@ enum AuthAction {
 /// returns integer value of argument passed.
 /// returns double if value is double
 /// Can be coerced to a double by passing double as type
-/// 
+///
 dynamic _intTryParse(dynamic value, [String type]) {
   if (value == null) return 0;
   if (type != null && type == 'double') return _doubleTryParse(value);
@@ -304,7 +304,7 @@ dynamic _intTryParse(dynamic value, [String type]) {
 /// returns double value of argument passed.
 /// returns integer if value is integer
 /// Can be coerced to a integer by passing int as type
-/// 
+///
 dynamic _doubleTryParse(dynamic value, [String type]) {
   if (value == null) return 0.0;
   if (type != null && type == 'int') return _intTryParse(value);
@@ -328,6 +328,7 @@ String _firestoreType(dynamic value) {
   if (value is List) return 'ArrayValue';
   return 'stringValue';
 }
+
 ///
 /// Returns dart value from firestore value passed
 /// Can coerce the return type by passing either 'int' or 'double' as type
@@ -404,12 +405,13 @@ Map<String, dynamic> serialize(Map<String, dynamic> item) {
   });
   return n;
 }
+
 ///
 /// Returns a Map with dart values for keys
 /// given  a Map obtained from reading Firestore
-/// can be coerced to int/double by passing 
+/// can be coerced to int/double by passing
 /// schema of the model
-/// 
+///
 Map<String, dynamic> deserialize(Map<String, dynamic> fields,
     [Map<String, String> schema]) {
   Map<String, dynamic> items = {};
