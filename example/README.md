@@ -6,10 +6,10 @@ A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/d
 
 To use this package:
 
-1. Using the [Firebase Console](http://console.firebase.google.com/), add a *web* app to your project.
+1. Using the [Firebase Console](http://console.firebase.google.com/), add a _web_ app to your project.
 2. Go to **Project Settings** , copy down
-    1. Project ID
-    2. Web API Key
+   1. Project ID
+   2. Web API Key
 3. Add `cloud_firestore_rest` and `global_configuration` as a [dependency](https://flutter.dev/docs/development/packages-and-plugins/using-packages) in your `pubspec.yaml` file.
 4. Edit `lib/main.dart` and edit code
 
@@ -28,7 +28,7 @@ To use this package:
 
    ```
 
-  Of course you may use any of the `GlobalConfiguration` load methods of your choice to configure your app. The package expects `projectId` and `webKey` to be available as part of global configuration.
+Of course you may use any of the `GlobalConfiguration` load methods of your choice to configure your app. The package expects `projectId` and `webKey` to be available as part of global configuration.
 
 ## Usage
 
@@ -64,7 +64,7 @@ List<Item> items = await getItems(query: [
 
 #### Get all documents from a collection
 
-Call `Firestore.get(collection: 'collectionId')` without supplying a `query` argument to get *all*  the documents from the collection.
+Call `Firestore.get(collection: 'collectionId')` without supplying a `query` argument to get _all_ the documents from the collection.
 
 #### Get a specific document
 
@@ -104,7 +104,7 @@ try {
 Updates entire document. If document is not found, adds the document
 to the collection.
 
-**Note**: If an entire document is not passed to this function, the API *will not* throw error, instead will *write a truncated document*.
+**Note**: If an entire document is not passed to this function, the API _will not_ throw error, instead will _write a truncated document_.
 
 ```dart
 ...
@@ -123,9 +123,9 @@ try {
 
 #### Update fields in a document
 
-Updates only the fields passed via the body argument. The fields *can* be new - not part of the existing document.
+Updates only the fields passed via the body argument. The fields _can_ be new - not part of the existing document.
 
-If the document is not found,  **Will not** add a new document, but *will* throw error.
+If the document is not found, **Will not** add a new document, but _will_ throw error.
 
 ```dart
 ...
