@@ -2,30 +2,34 @@
 
 A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/docs/firestore/) by cross platform Flutter Apps.
 
-This package will work on  Android, IOS, Linux, macOs apps. The package has not been tested on Windows platform but there 
+This package supports Android, IOS, Linux, macOs platforms as only the http interface is used.
+
+ The package has not been tested on Windows platform but there
 are no technical reasons for it not to function correctly in Windows environment.
 
 ## Contents
 
-  - [Setup](#setup)
-  - [Usage](#usage)
-    - [Read from firestore](#read-from-firestore)
-      - [Performing a query](#performing-a-query)
-      - [Get all documents from a collection](#get-all-documents-from-a-collection)
-      - [Get a specific document](#get-a-specific-document)
-  - [Write to firestore](#write-to-firestore)
-    - [Add new Collection/document](#add-new-collectiondocument)
-    - [Update document](#update-document)
-      - [Update a document, add if the document does not exist](#update-a-document-add-if-the-document-does-not-exist)
-      - [Update fields in a document](#update-fields-in-a-document)
-    - [Delete document](#delete-document)
-  - [Authentication](#authentication)
-    - [Signup](#signup)
-    - [Signin](#signin)
+- [Cloud Firestore Package for Flutter](#cloud-firestore-package-for-flutter)
+  - [Contents](#contents)
+    - [Setup](#setup)
+    - [CRUD](#crud)
+      - [Read from firestore](#read-from-firestore)
+        - [Performing a query](#performing-a-query)
+        - [Get all documents from a collection](#get-all-documents-from-a-collection)
+        - [Get a specific document](#get-a-specific-document)
+      - [Write to firestore](#write-to-firestore)
+        - [Add new Collection/document](#add-new-collectiondocument)
+      - [Update document](#update-document)
+        - [Update a document, add if the document does not exist](#update-a-document-add-if-the-document-does-not-exist)
+        - [Update fields in a document](#update-fields-in-a-document)
+      - [Delete document](#delete-document)
+    - [Authentication](#authentication)
+      - [Signup](#signup)
+      - [Signin](#signin)
 
 
 
-## Setup
+### Setup
 
 To use this package:
 
@@ -53,11 +57,11 @@ To use this package:
 
 Of course, you may use any of the `GlobalConfiguration` load methods of your choice to configure your app. The package expects `projectId` and `webKey` to be available as part of global configuration.
 
-## Usage
+### CRUD
 
-### Read from firestore
+#### Read from firestore
 
-#### Performing a query
+##### Performing a query
 
 ```dart
 ...
@@ -86,11 +90,11 @@ List<Item> items = await getItems(query: [
 
 ```
 
-#### Get all documents from a collection
+##### Get all documents from a collection
 
 Call `Firestore.get(collection: 'collectionId')` without supplying a `query` argument to get _all_ the documents from the collection.
 
-#### Get a specific document
+##### Get a specific document
 
 ```dart
 ...
@@ -104,9 +108,9 @@ Item item = Item.fromJson(document);
 
 ```
 
-## Write to firestore
+#### Write to firestore
 
-### Add new Collection/document
+##### Add new Collection/document
 
 Creates a new collection if collection does not exist. Adds the document if the document does not exist.
 
@@ -124,9 +128,9 @@ try {
 
 ```
 
-### Update document
+#### Update document
 
-#### Update a document, add if the document does not exist
+##### Update a document, add if the document does not exist
 
 Updates entire document. If document is not found, adds the document
 to the collection.
@@ -148,7 +152,7 @@ try {
 
 ```
 
-#### Update fields in a document
+##### Update fields in a document
 
 Updates only the fields passed via the body argument. The fields _can_ be new - not part of the existing document.
 
@@ -169,7 +173,7 @@ try {
 
 ```
 
-### Delete document
+#### Delete document
 
 Deletes the document in the collection specified.
 
@@ -189,9 +193,9 @@ try {
 
 ```
 
-## Authentication
+### Authentication
 
-### Signup
+#### Signup
 
 SignUp registers a new email with [firebase](https://firebase.com)
 
@@ -212,7 +216,7 @@ final Map<String, dynamic> auth = await Firestore.signInOrSignUp(
 
 
 
-### Signin
+#### Signin
 
 ```dart
 ...
