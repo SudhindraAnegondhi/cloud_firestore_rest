@@ -255,19 +255,25 @@ class Firestore {
   ///
 
   ///
-  /// Returns idToken, expiryDate, userId  or error after performing
-  /// a login (AuthAction.signInWithPassword) or registeration of a new user
-  /// (AuthAction.signUp).
+  /// Returns idToken, expiryDate, userId in a Map
+  /// if successful or null
+  /// Specify either AuthAction.signUp for a new login
+  /// registration or AuthAction.signInWithEmailPassword
+  /// Throws Exception on failure or error
   ///
-  /// Throws exception on error.
 
-  static Future<http.Response> signInOrSignUp({
+  static Future<Map<String, dynamic>> signInOrSignUp({
     String email,
     String password,
     AuthAction action,
   }) async {
     try {
-      return await http.post('$_authUrl:${describeEnum(action)}?key=$_webKey');
+      final response =
+          await http.post('$_authUrl:${describeEnum(action)}?key=$_webKey');
+      if (response.statusCode >= 400) {
+        throw HttpException(response.reasonPhrase);
+      }
+      return json.decode(response.body);
     } catch (error) {
       throw HttpException(error.toString());
     }
@@ -279,7 +285,7 @@ class Firestore {
 ///
 enum AuthAction {
   signUp,
-  signInWithPassword,
+  signInWithEmailPassword,
 }
 
 ///

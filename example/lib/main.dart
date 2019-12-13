@@ -33,6 +33,7 @@ class MyHomePage extends StatefulWidget {
         password: '123456',
         action: AuthAction.signUp
       );
+      if()
     } catch (error) {
       print(error);
     }

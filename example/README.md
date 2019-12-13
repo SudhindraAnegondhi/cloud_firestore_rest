@@ -5,6 +5,26 @@ A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/d
 This package will work on  Android, IOS, Linux, macOs apps. The package has not been tested on Windows platform but there 
 are no technical reasons for it not to function correctly in Windows environment.
 
+## Contents
+
+  - [Setup](#setup)
+  - [Usage](#usage)
+    - [Read from firestore](#read-from-firestore)
+      - [Performing a query](#performing-a-query)
+      - [Get all documents from a collection](#get-all-documents-from-a-collection)
+      - [Get a specific document](#get-a-specific-document)
+  - [Write to firestore](#write-to-firestore)
+    - [Add new Collection/document](#add-new-collectiondocument)
+    - [Update document](#update-document)
+      - [Update a document, add if the document does not exist](#update-a-document-add-if-the-document-does-not-exist)
+      - [Update fields in a document](#update-fields-in-a-document)
+    - [Delete document](#delete-document)
+  - [Authentication](#authentication)
+    - [Signup](#signup)
+    - [Signin](#signin)
+
+
+
 ## Setup
 
 To use this package:
@@ -57,7 +77,7 @@ Future<List<Item>> getItems({List<Query> query)}) {
 ...
 try {
 List<Item> items = await getItems(query: [
-  Query(field: 'orderDate', op: FieldOp.GREATER, value: searchDate),
+  Query(field: 'orderDate', op: FieldOp.GREATER_THAN, value: searchDate),
   Query(field: 'customerId', value: searchId),
 ]);
 } catch(error) {
@@ -168,3 +188,45 @@ try {
 }
 
 ```
+
+## Authentication
+
+### Signup
+
+SignUp registers a new email with [firebase](https://firebase.com)
+
+```dart
+...
+
+try {
+final Map<String, dynamic> auth = await Firestore.signInOrSignUp(
+  email: 'test1@test.com',
+  password: '123456',
+  action: AuthAction.signUp,
+);
+} catch(error) {
+  // handle errors including id already exists
+}
+
+```
+
+
+
+### Signin
+
+```dart
+...
+
+try {
+final Map<String, dynamic> auth = await Firestore.signInOrSignUp(
+  email: 'test1@test.com',
+  password: '123456',
+  action: AuthAction.signInWithEmailPassword
+);
+} catch(error) {
+  // handle errors including id already exists
+}
+
+```
+
+On successful authentication,  the function returns a map with `idToken, expiryDate, userId, email` keys.
