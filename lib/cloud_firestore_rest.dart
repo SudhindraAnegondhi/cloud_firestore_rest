@@ -27,9 +27,6 @@ class Query {
 ///
 ///  A Flutter Package to use the **Cloud Firestore REST API**
 ///
-/// To use the package:
-/// * Using the Firebase Console, add a Web App to your project. Note down the project id and web key of your project settings.
-///
 
 class Firestore {
   ///
@@ -101,6 +98,8 @@ class Firestore {
             },
           });
         }
+        // TODO: allow queries of aribitrary complexities
+
         sQuery['structuredQuery']['where'] = {
           "compositeFilter": {
             "filters": rows,
