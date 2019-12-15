@@ -27,8 +27,6 @@ are no technical reasons for it not to function correctly in Windows environment
       - [Signup](#signup)
       - [Signin](#signin)
 
-
-
 ### Setup
 
 To use this package:
@@ -38,7 +36,7 @@ To use this package:
    1. Project ID
    2. Web API Key
 3. Add `cloud_firestore_rest` and `global_configuration` as a [dependency](https://flutter.dev/docs/development/packages-and-plugins/using-packages) in your `pubspec.yaml` file.
-4. Edit your app's `lib/main.dart` 
+4. Edit your app's `lib/main.dart`
 
    ```dart
    +import 'package:global_configuration/global_configuration.dart';
@@ -214,8 +212,6 @@ final Map<String, dynamic> auth = await Firestore.signInOrSignUp(
 
 ```
 
-
-
 #### Signin
 
 ```dart
@@ -225,7 +221,7 @@ try {
 final Map<String, dynamic> auth = await Firestore.signInOrSignUp(
   email: 'test1@test.com',
   password: '123456',
-  action: AuthAction.signInWithEmailPassword
+  action: AuthAction.signInWithPassword
 );
 } catch(error) {
   // handle errors including id already exists
