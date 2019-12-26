@@ -66,7 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
     for (int i = 0; i < 10; i++) {
       await Firestore.add(
         collection: 'test',
-        id: i,
         body: {'id': i, 'text': 'commment $i'},
       );
       setState(() {

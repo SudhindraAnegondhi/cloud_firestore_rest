@@ -81,16 +81,16 @@ Item item = Item.fromJson(document);
 
 ### Add new Collection/document
 
-Creates a new collection if collection does not exist. Adds the document if the document does not exist.
+Creates a new collection if collection does not exist. Adds the document if the document does not exist. Returns created document.
 
 ```dart
 
 try {
-  await Firestore.add(
+  final document = await Firestore.add(
     collection: 'orders',
-    id: order.id,
     body: order.toJson
     );
+  order.id = docurment['id'];
 } catch (error) {
   // handle error
 }

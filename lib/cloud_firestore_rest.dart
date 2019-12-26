@@ -167,6 +167,14 @@ class Firestore {
     }
   }
 
+  static Map<String, dynamic> _mapFirestoreToDart(String jsonString) {
+    final doc = json.decode(jsonString);
+    Map<String, dynamic> item = {};
+    final fields = doc['fields'];
+    fields.forEach((k, v) => {item[k] = parse(v)});
+    return item;
+  }
+
   ///
   /// returns a single document from collection specified by **id** as *Map<String, dynamic> .
   ///
@@ -176,16 +184,12 @@ class Firestore {
     String collection,
     dynamic id,
   }) async {
-    Map<String, dynamic> item = {};
     try {
       final response = await http.get(
           '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}?key=$_webKey');
 
       if (response.statusCode < 400) {
-        final doc = json.decode(response.body);
-        final fields = doc['fields'];
-        fields.forEach((k, v) => {item[k] = parse(v)});
-        return item;
+        return _mapFirestoreToDart(response.body);
       } else {
         throw HttpException(
             'Error reading $collection. ${response.reasonPhrase}');
@@ -218,7 +222,7 @@ class Firestore {
       );
       if (response.statusCode >= 400) {
         if (response.statusCode == 404) {
-          return await add(collection: collection, id: id, body: body);
+          return await add(collection: collection,  body: body);
         } else
           throw HttpException(
               'Error updating $collection. ${response.reasonPhrase}');
@@ -263,20 +267,21 @@ class Firestore {
   /// Throws exception if record exists
   /// Throws exception on IO error
   ///
-  static Future<void> add({String collection, dynamic id, dynamic body}) async {
+  static Future<Map<String, dynamic>> add(
+      {String collection, Map<String, dynamic> body}) async {
     try {
       final response = await http.post(
-        '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}/?key=$_webKey',
+        '$_baseUrl/$collection/?key=$_webKey',
         body: json.encode(serialize(
           item: body,
           collection: collection,
-          id: id,
         )),
       );
       if (response.statusCode >= 400) {
         throw HttpException(
             'Error adding $collection. ${response.reasonPhrase}');
       }
+      return _mapFirestoreToDart(response.body);
     } catch (error) {
       throw HttpException('Error adding $collection. ${error.toString()}');
     }
@@ -461,11 +466,7 @@ class Firestore {
     item.forEach((k, v) {
       n[k] = {_firestoreType(v): v};
     });
-    return {
-      'name':
-          'projects/$_projectId/databases/(default)/documents/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}',
-      'fields': n
-    };
+    return {'fields': n};
   }
 
   ///
