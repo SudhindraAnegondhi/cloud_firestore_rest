@@ -2,7 +2,8 @@
 
 ## Issues
 
-_**TODO*_ ion from dart to firestore - for DateTime, List and Map types 
+_**TODO*_ serialozation 
+rom dart to firestore - for DateTime, List and Map types 
 
 A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/docs/firestore/) by cross platform Flutter Apps.
 
