@@ -41,7 +41,7 @@ enum AuthAction {
 enum FilterOp {
   NotSpecified,
   AND,
-  OR, // Not implemented
+  // OR, // Not implemented
 }
 
 ///
@@ -78,7 +78,7 @@ class Firestore {
   ///
   ///
   static Future<List<Map<String, dynamic>>> get({
-    String collection,
+    @required String collection,
     String sortField,
     String sortOrder = 'ASCENDING',
     String keyField,
@@ -155,6 +155,7 @@ class Firestore {
           Map<String, dynamic> item = {};
           final fields = doc['document']['fields'];
           fields.forEach((k, v) => {item[k] = parse(v)});
+          item['id'] = doc['document']['name'].split('/')[6];
           items.add(item);
         });
         return items;
@@ -169,9 +170,11 @@ class Firestore {
 
   static Map<String, dynamic> _mapFirestoreToDart(String jsonString) {
     final doc = json.decode(jsonString);
+    final id = doc['name'].split('/')[6];
     Map<String, dynamic> item = {};
     final fields = doc['fields'];
     fields.forEach((k, v) => {item[k] = parse(v)});
+    item['id'] = id;
     return item;
   }
 
@@ -181,8 +184,8 @@ class Firestore {
   /// Throws exception if document not found
   ///
   static Future<Map<String, dynamic>> getDocument({
-    String collection,
-    dynamic id,
+    @required String collection,
+    @required dynamic id,
   }) async {
     try {
       final response = await http.get(
@@ -199,82 +202,57 @@ class Firestore {
     }
   }
 
-  /// Updates firestore document specified by **id**
-  /// **body** contains a map with records contents
-  ///
-  /// *adds* a new document to the collection if there is no document corresponding to the **id**
-  ///
-  /// **collection** must exist
-  ///
-  /// throws exception on error
-  ///
-
-  static Future<void> setAll(
-      {String collection, dynamic id, Map<String, dynamic> body}) async {
-    try {
-      final response = await http.put(
-        '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}/?key=$_webKey',
-        body: json.encode(serialize(
-          item: body,
-          collection: collection,
-          id: id,
-        )),
-      );
-      if (response.statusCode >= 400) {
-        if (response.statusCode == 404) {
-          return await add(collection: collection,  body: body);
-        } else
-          throw HttpException(
-              'Error updating $collection. ${response.reasonPhrase}');
-      }
-    } catch (error) {
-      throw HttpException('Error updating $collection. ${error.toString()}');
-    }
-  }
-
-  /// Updates the fields contained in the **body** of the document identified by **id**
-  /// **Note** Throws exception if corresponding document is not found.
-  ///
-  ///**collection** must exist
+ 
+  /// Updates the the document specified by *id* passed as the **body**
+  /// 
+  /// If the document specified does not exist, a _new document_ is added, and the newly added document's id 
+  /// is returned along with the document
   ///
   /// throws exception on error
 
-  static Future<void> set(
-      {String collection, dynamic id, Map<String, dynamic> body}) async {
+  static Future<Map<String, dynamic> update({
+    @required String collection,
+    @required dynamic id,
+    @required Map<String, dynamic> body,
+  }) async {
     try {
+      body.remove('id'); // firestore id is not stored in the record
       final response = await http.patch(
         '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}?key=$_webKey',
         body: json.encode(serialize(
           item: body,
-          collection: collection,
-          id: id,
         )),
       );
       if (response.statusCode >= 400) {
         throw HttpException(
             'Error updating $collection. ${response.reasonPhrase}');
       }
+      return _mapFirestoreToDart(response.body);
+
     } catch (error) {
       throw HttpException('Error updating $collection. ${error.toString()}');
     }
   }
 
   ///
-  /// Adds a record to the specified document/id.
+  /// Adds a record to the specified collectoion
+  ///
+  /// Returns added record containing id.
   ///
   /// Creates a new collection if collection does not exist.
   ///
   /// Throws exception if record exists
   /// Throws exception on IO error
   ///
-  static Future<Map<String, dynamic>> add(
-      {String collection, Map<String, dynamic> body}) async {
+  static Future<Map<String, dynamic>> add({
+    @required String collection,
+    @required Map<String, dynamic> body,
+  }) async {
     try {
       final response = await http.post(
         '$_baseUrl/$collection/?key=$_webKey',
         body: json.encode(serialize(
           item: body,
-          collection: collection,
         )),
       );
       if (response.statusCode >= 400) {
@@ -293,9 +271,12 @@ class Firestore {
   /// Throws exception if document does not exist
   /// Throws exception on I/O error
 
-  static Future<void> delete({String collection, dynamic id}) async {
+  static Future<void> delete({
+    @required String collection,
+    @required dynamic id,
+  }) async {
     try {
-      await http.put(
+      await http.delete(
           '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}?key=$_webKey');
     } catch (error) {
       throw HttpException('Error deleting $collection. ${error.toString()}');
@@ -458,9 +439,7 @@ class Firestore {
   ///
 
   static Map<String, dynamic> serialize({
-    Map<String, dynamic> item,
-    String collection,
-    dynamic id,
+    @required Map<String, dynamic> item,
   }) {
     Map<String, dynamic> n = {};
     item.forEach((k, v) {

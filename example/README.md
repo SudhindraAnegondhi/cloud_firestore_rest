@@ -1,28 +1,26 @@
-# Cloud Firestore Package for Flutter
+# Cloud Firestore REST API for Flutter
 
 A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/docs/firestore/) by cross platform Flutter Apps.
 
-This package supports Android, IOS, Linux, macOs platforms as only the http interface is used.
+This package supports Android, IOS, Linux, macOs platforms.
 
- The package has not been tested on Windows platform but there
-are no technical reasons for it not to function correctly in Windows environment.
+The package has not been tested on Windows platform but there
+should be no technical reason for it not to function correctly in Windows environment.
 
 ## Contents
 
-- [Cloud Firestore Package for Flutter](#cloud-firestore-package-for-flutter)
+- [Cloud Firestore REST API for Flutter](#cloud-firestore-rest-api-for-flutter)
   - [Contents](#contents)
     - [Setup](#setup)
-    - [CRUD](#crud)
-      - [Read from firestore](#read-from-firestore)
-        - [Performing a query](#performing-a-query)
-        - [Get all documents from a collection](#get-all-documents-from-a-collection)
-        - [Get a specific document](#get-a-specific-document)
-      - [Write to firestore](#write-to-firestore)
-        - [Add new Collection/document](#add-new-collectiondocument)
-      - [Update document](#update-document)
-        - [Update a document, add if the document does not exist](#update-a-document-add-if-the-document-does-not-exist)
-        - [Update fields in a document](#update-fields-in-a-document)
-      - [Delete document](#delete-document)
+    - [Read from firestore](#read-from-firestore)
+    - [Get Documents](#get-documents)
+      - [Parameters](#parameters)
+      - [Get() Usage](#get-usage)
+    - [Get a document by ID](#get-a-document-by-id)
+      - [Usage](#usage)
+    - [Create new Document](#create-new-document)
+    - [Update document](#update-document)
+    - [Delete document](#delete-document)
     - [Authentication](#authentication)
       - [Signup](#signup)
       - [Signin](#signin)
@@ -55,28 +53,78 @@ To use this package:
 
 Of course, you may use any of the `GlobalConfiguration` load methods of your choice to configure your app. The package expects `projectId` and `webKey` to be available as part of global configuration.
 
-### CRUD
+### Read from firestore
 
-#### Read from firestore
+### Get Documents
 
-##### Performing a query
+`Firestore.get()` may be used to read all documents in a collection or any documents that meet specified filters.
+
+#### Parameters
+
+**collection** _string_ _**required**_
+
+ name of the collection root. example: 'users', 'users/seniors'
+
+**sort** _List<Map<String, String>>_
+  
+To specifiy one or more sort fields
 
 ```dart
-...
+  sort: [
+    { 'field: 'date', 'direction': 'ASCENDING' },
+    { 'field: 'orderNumber' },
+  ],
+```
 
+__Alternatively_, 
+  If it's just one field you can use the **sortField** and **sortOrder** parameters.Direction can be either 'ASCENDING' or 'DESCENDING'.
+
+**query** _List<Map<String, dynamic>>_
+
+Multiple filters can be specified by using the **query** parameter.
+
+Multiple filters can be specified. As on date Firestore
+supports joining multiple filter conditions only using 'AND'.
+
+
+```dart
+  query: [
+    Query(field: 'age', op: 'EQUAL', value: 31),
+    Query(...)
+  ],
+
+```
+
+Field logical operator - 
+**op** can be omitted if you are testing equality. The op can be any one of the following strings:
+
+`LESS_THAN,
+  LESS_THAN_OR_EQUAL,
+  GREATER_THAN,
+  GREATER_THAN_OR_EQUAL,
+  EQUAL,
+  ARRAY_CONTAINS,
+  IN,
+  ARRAY_CONTAINS_ANY,`
+
+```dart
+   Future<List<Map<String, dynamic>>> get({
+    @required String collection,
+    String sortField,
+    String sortOrder = 'ASCENDING',
+    String keyField,
+    String keyOp = 'EQUAL',
+    String keyValue,
+    List<Map<String, dynamic>> sort,
+    List<Query> query,
+  })
+```
+
+#### Get() Usage
+
+```dart
 import 'package:cloud_firestore_rest/cloud_firestore_rest.dart';
 
-Future<List<Item>> getItems({List<Query> query)}) {
-  List<Item> items;
-  final documents = await Firestore.get(
-    collection: 'items',
-    query: query,
-    );
-  documents.map((doc) => _items.add(Item.fromJson(doc)));
-  return items;
-}
-
-...
 try {
 List<Item> items = await getItems(query: [
   Query(field: 'orderDate', op: FieldOp.GREATER_THAN, value: searchDate),
@@ -88,50 +136,55 @@ List<Item> items = await getItems(query: [
 
 ```
 
-##### Get all documents from a collection
+### Get a document by ID
 
-Call `Firestore.get(collection: 'collectionId')` without supplying a `query` argument to get _all_ the documents from the collection.
+Cloud Firestore REST API generates a unique ID for each document stored in  a collection.
 
-##### Get a specific document
+If the specified document could not be found, API throws an error.
+
+
+#### Usage
 
 ```dart
-...
-Map<String, dynamic> document = await Firestore.getDocument(
-  collection: 'items',
-  id: searchId,
-); // returns null if not found
-Item item = Item.fromJson(document);
-...
-
+try {
+  final Map<String, dynamic> document = await Firestore.getDocument(
+    collection: 'users',
+    id: 'ACDZ638V565577'
+  );
+  // found!
+} catch(error) {
+  if(error.contains('NOT FOUND)) {
+    // not found
+  }
+  // some other error
+}
 
 ```
 
-#### Write to firestore
+### Create new Document
 
-##### Add new Collection/document
+Adds a new document to the specified collection. Creates a new collection if the collection did not exist.
 
-Creates a new collection if collection does not exist. Adds the document if the document does not exist.
+The newly added document is returned along with _the id created by **Firestore**_.
 
 ```dart
 
 try {
-  await Firestore.add(
+  final Map<String, dynamic> document = await Firestore.add(
     collection: 'orders',
-    id: order.id,
     body: order.toJson
     );
+  // document['id] contains the newly created document's id.
 } catch (error) {
   // handle error
 }
 
 ```
 
-#### Update document
+### Update document
 
-##### Update a document, add if the document does not exist
-
-Updates entire document. If document is not found, adds the document
-to the collection.
+Updates entire document. If document is not found, _adds the document
+to the collection._
 
 **Note**: If an entire document is not passed to this function, the API _will not_ throw error, instead will _write a truncated document_.
 
@@ -139,7 +192,7 @@ to the collection.
 ...
 
 try {
-  await Firstore.setAll(
+  await Firstore.update(
     collection: 'orders',
     id: order.id,
     body: order.toJson,
@@ -150,28 +203,9 @@ try {
 
 ```
 
-##### Update fields in a document
 
-Updates only the fields passed via the body argument. The fields _can_ be new - not part of the existing document.
 
-If the document is not found, **Will not** add a new document, but _will_ throw error.
-
-```dart
-...
-
-try {
-  await Firstore.set(
-    collection: 'orders',
-    id: order.id,
-    body: order.toJson,
-  );
-} catch(error) {
-  // handle error
-}
-
-```
-
-#### Delete document
+### Delete document
 
 Deletes the document in the collection specified.
 
@@ -229,4 +263,4 @@ final Map<String, dynamic> auth = await Firestore.signInOrSignUp(
 
 ```
 
-On successful authentication,  the function returns a map with `idToken, expiryDate, userId, email` keys.
+On successful authentication,  the function returns a map containing `idToken, expiryDate, userId, email` as keys.
