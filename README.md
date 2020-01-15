@@ -75,7 +75,9 @@ Call `Firestore.get(collection: 'collectionId')` without supplying a `query` arg
 
 ```dart
 ...
-Map<String, dynamic> document = await Firestore.getDocument(collection: 'items', id: searchId); // returns null if not found
+Map<String, dynamic> document = await Firestore.getDocument(
+  collection: 'items', id: searchId,
+  ); // returns null if not found
 Item item = Item.fromJson(document);
 ...
 
