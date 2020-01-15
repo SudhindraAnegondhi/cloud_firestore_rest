@@ -1,4 +1,9 @@
-# Cloud Firestore Package for Flutter
+# Cloud Firestore Package for Flutter - Work in Progress
+
+## Issues
+
+_**TODO**_ serialization 
+rom dart to firestore - for DateTime, List and Map types 
 
 A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/docs/firestore/) by cross platform Flutter Apps.
 

@@ -4,154 +4,156 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:cloud_firestore_rest/cloud_firestore_rest.dart';
 
 void main() {
+  ///
+  /// Configure your Firebase Firestore settings here
+  ///
   GlobalConfiguration().loadFromMap({
     'projectId': 'flutter-shop-aec08',
     'webKey': 'AIzaSyDVGNPjOOMaa7kqgTKc4sy15ayVFkmpHHc',
   });
-  runApp(MyApp());
+  runApp(TodoApp());
 }
 
-class MyApp extends StatelessWidget {
+class TodoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Firestore REST Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Firestore REST Example'),
+    return new MaterialApp(
+      title: 'Cloud Firestore REST API Example',
+      home: TodoList(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
+class TodoList extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _TodoListState createState() => _TodoListState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _TodoListState extends State<TodoList> {
   bool _isInit = true;
-  bool _isLoading = false;
-  bool _isWrite = false;
-  bool _isRead = false;
-  bool _isUpdate = false;
-  bool _isDelete = false;
+  bool _isBusy = false;
+  List<Map<String, dynamic>> _todoItems = [];
 
-  Map<String, dynamic> auth;
+  Future<void> _addTodoItem() async {
+    try {
+      setState(() {
+        _isBusy = true;
+      });
+      final item = await Firestore.add(collection: 'todo', body: {
+        'text': 'Item #${_todoItems.length}',
+      });
+
+      setState(() {
+        _todoItems.add(item);
+        _isBusy = false;
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> _update({
+    Map<String, dynamic> item,
+    bool delete = false,
+  }) async {
+    try {
+      setState(() {
+        _isBusy = true;
+      });
+      if (delete) {
+        await Firestore.delete(
+          collection: 'todo',
+          id: item['id'],
+        );
+        _todoItems.removeWhere((_item) => _item['id'] == item['id']);
+      } else {
+        await Firestore.update(
+          collection: 'todo',
+          id: item['id'],
+          body: item,
+        );
+      }
+    } catch (error) {
+      print(error);
+    }
+    setState(() {
+      _isBusy = false;
+    });
+  }
+
+  Widget _buildTodoList() {
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        if (index < _todoItems.length) {
+          return _buildTodoItem(_todoItems[index]);
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildTodoItem(Map<String, dynamic> item) {
+    return ListTile(
+      title: Text(item['text']),
+      onTap: () async {
+        if (item['text'].contains('Done')) {
+          await _update(item: item, delete: true);
+        } else {
+          item['text'] += ' Done';
+          await _update(item: item);
+        }
+      },
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _getTodos() async {
+    final items = await Firestore.get(
+      collection: 'todo',
+      sortField: 'text',
+    );
+    return items;
+  }
 
   @override
   void didChangeDependencies() {
     if (_isInit) {
-      setState(() {
-        _isLoading = true;
-        _isInit = false;
-      });
-      _register().then((_) {
-        setState(() {
-          _isLoading = false;
-        });
+      _isBusy = true;
+      _getTodos().then((items) {
+        _todoItems = items;
       }).catchError((error) {
         print(error);
+      }).whenComplete(() {
+        setState(() {
+          _isInit = false;
+          _isBusy = false;
+        });
       });
     }
     super.didChangeDependencies();
-  }
-
-  void operations() async {
-    for (int i = 0; i < 10; i++) {
-      await Firestore.add(
-        collection: 'test',
-        body: {'id': i, 'text': 'commment $i'},
-      );
-      setState(() {
-        _counter++;
-      });
-    }
-    setState(() {
-      _isWrite = true;
-      _counter = 0;
-    });
-    for (int i = 0; i < 10; i++) {
-      await Firestore.getDocument(
-        collection: 'test',
-        id: i,
-      );
-      setState(() {
-        _counter++;
-      });
-    }
-    setState(() {
-      _isRead = true;
-      _counter = 0;
-    });
-    for (int i = 0; i < 10; i++) {
-      await Firestore.delete(
-        collection: 'test',
-        id: i,
-      );
-      setState(() {
-        _counter++;
-      });
-    }
-    setState(() {
-      _isDelete = true;
-      _counter = 0;
-    });
-  }
-
-  Future<void> _register() async {
-    try {
-      auth = await Firestore.signInOrSignUp(
-          email: 'test12@test3.com',
-          password: '123456',
-          action: AuthAction.signInWithPassword);
-    } catch (error) {
-      try {
-        auth = await Firestore.signInOrSignUp(
-          email: 'test12@test3.com',
-          password: '123456',
-          action: AuthAction.signUp,
-        );
-      } catch (error) {
-        print(error);
-      }
-    }
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title + (auth == null ? 'Log in' : auth['email'])),
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Container(
-              child: Column(
-                children: <Widget>[
-                  if (auth != null) Text('You are logged in'),
-                  if (_isWrite) Text('Write complete'),
-                  if (_isRead) Text('Read complete'),
-                  if (_isDelete) Text('Delete complete'),
-                ],
+        title: Row(
+          children: <Widget>[
+            Text('Cloud Firestore REST API Example'),
+            if (_isBusy)
+              Container(
+                child: CircularProgressIndicator(
+                  backgroundColor: Colors.white,
+                  strokeWidth: 2.0,
+                ),
               ),
-            ),
+          ],
+        ),
+      ),
+      body: _buildTodoList(),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.edit),
-        onPressed: () {
-          operations();
-        },
+        onPressed: _addTodoItem,
+        tooltip: 'Add task',
+        child: Icon(Icons.add),
       ),
     );
   }
