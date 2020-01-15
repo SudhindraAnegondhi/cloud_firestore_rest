@@ -210,7 +210,10 @@ class Firestore {
   ///
 
   static Future<void> setAll(
-      {String collection, dynamic id, Map<String, dynamic> body, bool addNew = false}) async {
+      {String collection,
+      dynamic id,
+      Map<String, dynamic> body,
+      bool addNew = false}) async {
     try {
       String updateMask = '';
       body.keys.forEach((k) {
@@ -220,10 +223,9 @@ class Firestore {
         '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}/?key=$_webKey$updateMask',
         body: json.encode(serialize(
           item: body,
-         
         )),
       );
-      
+
       if (response.statusCode >= 400) {
         if (response.statusCode == 404 && addNew) {
           return await add(collection: collection, body: body, id: id);
@@ -235,7 +237,6 @@ class Firestore {
       throw HttpException('Error updating $collection. ${error.toString()}');
     }
   }
-
 
   ///
   /// Adds a record to the specified document/id.
@@ -255,7 +256,6 @@ class Firestore {
         '$_baseUrl/$collection$docId/?key=$_webKey',
         body: json.encode(serialize(
           item: body,
-         
         )),
       );
       if (response.statusCode >= 400) {

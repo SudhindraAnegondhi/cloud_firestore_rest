@@ -37,6 +37,30 @@ Of course you may use any of the `GlobalConfiguration` load methods of your choi
 
 ## Usage
 
+###  Authentication
+
+You can register your users in **firebase** and use _googleapis_ identitytoolkit to login and logout users.
+
+```dart
+try {
+Map<String, dynamic> response = await signInOrSignU[(
+  email: 'abcd@efg.com',
+  password: '123456',
+  action: AuthAction.signUp **OR** AuthAction.signInWithPassword,
+);
+} catch (error) {
+  // handle error
+}
+
+```
+
+The returned _*response*_ contains
+  * firebase userId
+  * auth token
+  * login expiry
+
+
+
 ### Read from firestore
 
 #### Performing a query
