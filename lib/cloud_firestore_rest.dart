@@ -212,17 +212,21 @@ class Firestore {
   static Future<void> setAll(
       {String collection, dynamic id, Map<String, dynamic> body}) async {
     try {
-      final response = await http.put(
-        '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}/?key=$_webKey',
+      String updateMask = '';
+      body.keys.forEach((k) {
+        updateMask += '&updateMask.fieldPaths=$k';
+      });
+      final response = await http.patch(
+        '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}/?key=$_webKey$updateMask',
         body: json.encode(serialize(
           item: body,
-          collection: collection,
-          id: id,
+         
         )),
       );
+      
       if (response.statusCode >= 400) {
         if (response.statusCode == 404) {
-          return await add(collection: collection,  body: body);
+          return await add(collection: collection, body: body, id: id);
         } else
           throw HttpException(
               'Error updating $collection. ${response.reasonPhrase}');
@@ -232,49 +236,26 @@ class Firestore {
     }
   }
 
-  /// Updates the fields contained in the **body** of the document identified by **id**
-  /// **Note** Throws exception if corresponding document is not found.
-  ///
-  ///**collection** must exist
-  ///
-  /// throws exception on error
-
-  static Future<void> set(
-      {String collection, dynamic id, Map<String, dynamic> body}) async {
-    try {
-      final response = await http.patch(
-        '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}?key=$_webKey',
-        body: json.encode(serialize(
-          item: body,
-          collection: collection,
-          id: id,
-        )),
-      );
-      if (response.statusCode >= 400) {
-        throw HttpException(
-            'Error updating $collection. ${response.reasonPhrase}');
-      }
-    } catch (error) {
-      throw HttpException('Error updating $collection. ${error.toString()}');
-    }
-  }
 
   ///
   /// Adds a record to the specified document/id.
-  ///
+  /// if id is not specified, creates a new id.
   /// Creates a new collection if collection does not exist.
   ///
   /// Throws exception if record exists
   /// Throws exception on IO error
   ///
   static Future<Map<String, dynamic>> add(
-      {String collection, Map<String, dynamic> body}) async {
+      {String collection, Map<String, dynamic> body, dynamic id}) async {
     try {
+      final docId = id != null
+          ? '/${id.runtimeType.toString() == 'String' ? id : id.toString()}'
+          : '';
       final response = await http.post(
-        '$_baseUrl/$collection/?key=$_webKey',
+        '$_baseUrl/$collection$docId/?key=$_webKey',
         body: json.encode(serialize(
           item: body,
-          collection: collection,
+         
         )),
       );
       if (response.statusCode >= 400) {
@@ -459,8 +440,6 @@ class Firestore {
 
   static Map<String, dynamic> serialize({
     Map<String, dynamic> item,
-    String collection,
-    dynamic id,
   }) {
     Map<String, dynamic> n = {};
     item.forEach((k, v) {
