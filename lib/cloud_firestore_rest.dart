@@ -201,16 +201,16 @@ class Firestore {
 
   /// Updates firestore document specified by **id**
   /// **body** contains a map with records contents
-  ///
+  /// only fields in the body are updated.
   /// *adds* a new document to the collection if there is no document corresponding to the **id**
-  ///
+  /// and **addNew** is true - set false
   /// **collection** must exist
   ///
   /// throws exception on error
   ///
 
   static Future<void> setAll(
-      {String collection, dynamic id, Map<String, dynamic> body}) async {
+      {String collection, dynamic id, Map<String, dynamic> body, bool addNew = false}) async {
     try {
       String updateMask = '';
       body.keys.forEach((k) {
@@ -225,7 +225,7 @@ class Firestore {
       );
       
       if (response.statusCode >= 400) {
-        if (response.statusCode == 404) {
+        if (response.statusCode == 404 && addNew) {
           return await add(collection: collection, body: body, id: id);
         } else
           throw HttpException(

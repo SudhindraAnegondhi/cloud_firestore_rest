@@ -106,8 +106,12 @@ try {
 
 #### Update a document, add if the document does not exist
 
-Updates entire document. If document is not found, adds the document
+Updates only the fields passed via the body argument. The fields _can_ be new -  and need not be part of the existing document.
+
+If document is not found and the optional argument **addNew** is true, adds the document
 to the collection.
+
+If **id** is not supplied, firestore creates one for the document.
 
 **Note**: If an entire document is not passed to this function, the API _will not_ throw error, instead will _write a truncated document_.
 
@@ -119,6 +123,7 @@ try {
     collection: 'orders',
     id: order.id,
     body: order.toJson,
+    addNew: true,
   );
 } catch(error) {
   // handle error
@@ -126,26 +131,6 @@ try {
 
 ```
 
-#### Update fields in a document
-
-Updates only the fields passed via the body argument. The fields _can_ be new - not part of the existing document.
-
-If the document is not found, **Will not** add a new document, but _will_ throw error.
-
-```dart
-...
-
-try {
-  await Firstore.set(
-    collection: 'orders',
-    id: order.id,
-    body: order.toJson,
-  );
-} catch(error) {
-  // handle error
-}
-
-```
 
 ### Delete document
 
