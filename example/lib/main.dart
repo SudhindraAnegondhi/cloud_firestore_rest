@@ -67,7 +67,7 @@ class _TodoListState extends State<TodoList> {
         );
         _todoItems.removeWhere((_item) => _item['id'] == item['id']);
       } else {
-        await Firestore.update(
+        await Firestore.setAll(
           collection: 'todo',
           id: item['id'],
           body: item,
