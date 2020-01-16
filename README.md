@@ -1,17 +1,15 @@
 # Cloud Firestore Package for Flutter - Work in Progress
 
-## Issues
 
-_**TODO**_ serialization 
-rom dart to firestore - for DateTime, List and Map types 
-
-A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/docs/firestore/) by cross platform Flutter Apps.
+A Flutter Package to use the [Cloud Firestore API](https://firebase.google.com/docs/firestore/) for cross platform Flutter Apps.
 
 ## Setup
 
 To use this package:
 
-1. Using the [Firebase Console](http://console.firebase.google.com/), add a _web_ app to your project.
+1. Using the [Firebase Console](http://console.firebase.google.com/), add a _web_ app to your project. _**Note**_  Your app may be intended to run on IOS, Android, MacOS, Linux , Web or Windows platforms (or all of them) - you still add your app as a web app in firebase
+
+
 2. Go to **Project Settings** , copy down
    1. Project ID
    2. Web API Key

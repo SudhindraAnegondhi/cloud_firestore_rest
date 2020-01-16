@@ -1,0 +1,8 @@
+dartdoc:
+  exclude:
+    dart:*
+    flutter:*
+  ignore:
+    - ambiguous-doc-reference
+  errors:
+  

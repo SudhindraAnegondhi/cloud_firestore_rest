@@ -117,7 +117,7 @@ class Firestore {
           "fieldFilter": {
             "field": {"fieldPath": keyField},
             "op": keyOp,
-            "value": {_firestoreType(keyValue): keyValue},
+            "value": _encode(keyValue),
           }
         };
       } else if (query != null) {
@@ -129,7 +129,7 @@ class Firestore {
             'fieldfilter': {
               "field": {"fieldPath": query[i].field},
               "op": describeEnum(query[i].op),
-              "value": {_firestoreType(query[i].value): query[i].value},
+              "value": _encode(query[i].value),
             },
           });
         }
@@ -357,15 +357,22 @@ class Firestore {
   /// returns the Google Firestore type of the value passed
   ///
 
-  static String _firestoreType(dynamic value) {
-    if (value is String) return 'stringValue';
-    if (value is int) return 'integerValue';
-    if (value is double) return 'doubleValue';
-    if (value is bool) return 'booleanValue';
-    if (value is DateTime) return 'timestampValue';
-    if (value is Map) return 'MapValue';
-    if (value is List) return 'ArrayValue';
-    return 'stringValue';
+  static Map<String, dynamic> _encode(dynamic value) {
+    if (value == null) return {'nullValue': null};
+    if (value is int) return {'integerValue': value};
+    if (value is double) return {'doubleValue': value};
+    if (value is bool) return {'booleanValue': value};
+    if (value is DateTime) return {'timestampValue': value.toIso8601String()};
+    if (value is Map) return {'mapValue': serialize( item: value )}; 
+    if (value is List) {
+      final list = [];
+      value.forEach((v) {
+        list.add(_encode(v));
+      });
+      return {'arrayValue': {"values": list}};
+    }
+    
+    return {'stringValue': value is String ? value : value.toString()};
   }
 
   ///
@@ -443,7 +450,7 @@ class Firestore {
   }) {
     Map<String, dynamic> n = {};
     item.forEach((k, v) {
-      n[k] = {_firestoreType(v): v};
+      n[k] = _encode(v);
     });
     return {'fields': n};
   }

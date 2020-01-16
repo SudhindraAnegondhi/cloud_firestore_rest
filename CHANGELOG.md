@@ -9,3 +9,8 @@ A Flutter Package to use the Cloud Firestore API by cross platform Flutter Apps.
 ## [0.0.2] - 2020-01-15
 
 Added Firebase authentication 
+
+## [0.0.2+1] - 2020-01-16
+
+* Corrected handling of DateTime, Map and List types
+
