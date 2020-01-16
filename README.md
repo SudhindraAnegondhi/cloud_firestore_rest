@@ -41,7 +41,7 @@ You can register your users in **firebase** and use _googleapis_ identitytoolkit
 
 ```dart
 try {
-Map<String, dynamic> response = await signInOrSignU[(
+Map<String, dynamic> response = await Firestore.signInOrSignU[(
   email: 'abcd@efg.com',
   password: '123456',
   action: AuthAction.signUp **OR** AuthAction.signInWithPassword,
@@ -64,11 +64,10 @@ The returned _*response*_ contains
 #### Performing a query
 
 ```dart
-...
 
 import 'package:cloud_firestore_rest/cloud_firestore_rest.dart';
 
-Future<List<Item>> getItems({List<Query> query)}) {
+Future<List<Item>> Firestore.get({List<Query> query)}) {
   List<Item> items;
   final documents = await Firestore.get(
     collection: 'items',
@@ -79,8 +78,9 @@ Future<List<Item>> getItems({List<Query> query)}) {
 }
 
 ...
+
 try {
-List<Item> items = await getItems(query: [
+List<Item> items = await Firestore.get(query: [
   Query(field: 'orderDate', op: FieldOp.GREATER, value: searchDate),
   Query(field: 'customerId', value: searchId),
 ]);
