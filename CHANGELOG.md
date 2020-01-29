@@ -14,3 +14,6 @@ Added Firebase authentication
 
 * Corrected handling of DateTime, Map and List types
 
+## [0.0.2+1a] - 2020-01-16
+
+* Minor tweaks

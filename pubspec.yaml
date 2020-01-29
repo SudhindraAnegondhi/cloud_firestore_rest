@@ -1,6 +1,6 @@
 name: cloud_firestore_rest
 description: Platform agnostic REST API to access Google Cloud Firestore.
-version: 0.0.2+1
+version: 0.0.2+1a
 homepage: https://github.com/SudhindraAnegondhi/cloud_firestore_rest.git
 license: MIT
 

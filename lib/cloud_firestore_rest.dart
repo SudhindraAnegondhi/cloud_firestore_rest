@@ -152,10 +152,13 @@ class Firestore {
       if (response.statusCode < 400) {
         final docs = json.decode(response.body);
         docs.forEach((doc) async {
-          Map<String, dynamic> item = {};
-          final fields = doc['document']['fields'];
-          fields.forEach((k, v) => {item[k] = parse(v)});
-          items.add(item);
+          if (doc['document'] != null) {
+            Map<String, dynamic> item = {};
+            final fields = doc['document']['fields'];
+            fields.forEach((k, v) => {item[k] = parse(v)});
+            item['id'] = doc['document']['name'].split('/')[6];
+            items.add(item);
+          }
         });
         return items;
       } else {
@@ -363,15 +366,17 @@ class Firestore {
     if (value is double) return {'doubleValue': value};
     if (value is bool) return {'booleanValue': value};
     if (value is DateTime) return {'timestampValue': value.toIso8601String()};
-    if (value is Map) return {'mapValue': serialize( item: value )}; 
+    if (value is Map) return {'mapValue': serialize(item: value)};
     if (value is List) {
       final list = [];
       value.forEach((v) {
         list.add(_encode(v));
       });
-      return {'arrayValue': {"values": list}};
+      return {
+        'arrayValue': {"values": list}
+      };
     }
-    
+
     return {'stringValue': value is String ? value : value.toString()};
   }
 
