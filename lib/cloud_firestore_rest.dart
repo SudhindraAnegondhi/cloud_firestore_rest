@@ -1,16 +1,57 @@
 library cloud_firestore_rest;
 
+import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:global_configuration/global_configuration.dart';
+import 'package:http_parser/http_parser.dart';
+//import 'package:mime/mime.dart';
+
+// import './src/cloudinary.dart';
 
 String _projectId = GlobalConfiguration().getString('projectId');
 String _webKey = GlobalConfiguration().getString('webKey');
 String _baseUrl =
     'https://firestore.googleapis.com/v1/projects/$_projectId/databases/(default)/documents';
 const _authUrl = 'https://identitytoolkit.googleapis.com/v1/accounts';
+
+String _cloudinaryUrl = 'https://api.cloudinary.com/v1_1/spincent/upload';
+//String _cloudinaryApiKey = '558522652542845';
+
+Future<Map<String, dynamic>> upload(File image,
+    {Function progressIndicator}) async {
+  try {
+    final mimeType = 'image/jpeg';
+    //lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
+    final uploadRequest =
+        http.MultipartRequest('POST', Uri.parse(_cloudinaryUrl));
+    final file = await http.MultipartFile.fromPath('image', image.path,
+        contentType: MediaType('image', 'jpeg'));
+    //uploadRequest.fields['ext'] = 'jpeg';
+    uploadRequest.fields['upload_preset'] = 'wwopcql6';
+    uploadRequest.fields['tags'] = 'browser_upload';
+    uploadRequest.files.add(file);
+    final streamedResponse = await uploadRequest.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    if (response.statusCode != 200) {
+      throw response.reasonPhrase;
+    }
+    final data = json.decode(response.body);
+    return {
+      'public_id': data['public_id'],
+      'width': data['width'],
+      'height': data['height'],
+      'uploadedAt': data['access_control']['end'],
+      'src': data['secure_url'],
+      'type': mimeType,
+      'format': data['format'],
+    };
+  } catch (error) {
+    throw error;
+  }
+}
 
 /// Defines a query argument
 ///
@@ -77,6 +118,9 @@ class Firestore {
   /// **keyField**, **keyOp**, **keyValue** can be used fopr single condition.
   ///
   ///
+  ///
+
+  static Future deleteImageCloud(String url) async {}
   static Future<List<Map<String, dynamic>>> get({
     String collection,
     String sortField,
@@ -133,7 +177,6 @@ class Firestore {
             },
           });
         }
-        // TODO: allow queries of aribitrary complexities
 
         sQuery['structuredQuery']['where'] = {
           "compositeFilter": {
@@ -218,6 +261,7 @@ class Firestore {
       Map<String, dynamic> body,
       bool addNew = false}) async {
     try {
+      final item = await _checkUpload(body);
       String updateMask = '';
       body.keys.forEach((k) {
         updateMask += '&updateMask.fieldPaths=$k';
@@ -225,7 +269,7 @@ class Firestore {
       final response = await http.patch(
         '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}/?key=$_webKey$updateMask',
         body: json.encode(serialize(
-          item: body,
+          item: item,
         )),
       );
 
@@ -239,6 +283,25 @@ class Firestore {
     } catch (error) {
       throw HttpException('Error updating $collection. ${error.toString()}');
     }
+  }
+
+  static Future<Map<String, dynamic>> _checkUpload(
+      Map<String, dynamic> body) async {
+    final Map<String, dynamic> item = {};
+    try {
+      body.forEach((key, value) async {
+        print('$key $value');
+        if (value != null && value['file'] != null) {
+          final newValue = await upload(value);
+          item[key] = newValue;
+        } else {
+          item[key] = value;
+        }
+      });
+    } catch (error) {
+      throw error;
+    }
+    return item;
   }
 
   ///
@@ -255,10 +318,12 @@ class Firestore {
       final docId = id != null
           ? '/${id.runtimeType.toString() == 'String' ? id : id.toString()}'
           : '';
+      // check if there is a file to be uploaded
+      final item = await _checkUpload(body);
       final response = await http.post(
         '$_baseUrl/$collection$docId/?key=$_webKey',
         body: json.encode(serialize(
-          item: body,
+          item: item,
         )),
       );
       if (response.statusCode >= 400) {

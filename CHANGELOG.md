@@ -17,3 +17,7 @@ Added Firebase authentication
 ## [0.0.2+1a] - 2020-01-16
 
 * Minor tweaks
+
+## [0.0.3] - 2020-02-09
+
+Added file upload to cloudinary
