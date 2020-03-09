@@ -151,7 +151,7 @@ class Firestore {
         sort.forEach((item) {
           fields.add({
             "field": {"fieldPath": item['field']},
-            "direction": item['direction'],
+            "direction": item['direction'] ?? 'ascending',
           });
         });
         sQuery['structuredQuery']['orderBy'] = fields;
