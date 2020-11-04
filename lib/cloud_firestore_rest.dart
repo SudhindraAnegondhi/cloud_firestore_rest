@@ -344,7 +344,7 @@ class Firestore {
 
   static Future<void> delete({String collection, dynamic id}) async {
     try {
-      await http.put(
+      await http.delete(
           '$_baseUrl/$collection/${id.runtimeType.toString() == 'String' ? id : id.toString()}?key=$_webKey');
     } catch (error) {
       throw HttpException('Error deleting $collection. ${error.toString()}');
